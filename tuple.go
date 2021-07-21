@@ -28,13 +28,48 @@ func Equal(t1, t2 Tuple, e float64) bool {
 }
 
 // Add adds the coordinates of two tuples.
-func Add(t1, t2 Tuple) Tuple {
-	return Tuple{t1.x + t2.x, t1.y + t2.y, t1.z + t2.z, t1.w + t2.w}
+func (t Tuple) Add(t1 Tuple) Tuple {
+	return Tuple{t.x + t1.x, t.y + t1.y, t.z + t1.z, t.w + t1.w}
 }
 
 // Sub subtracts the coordinates of two tuples.
-func Sub(t1, t2 Tuple) Tuple {
-	return Tuple{t1.x - t2.x, t1.y - t2.y, t1.z - t2.z, t1.w - t2.w}
+func (t Tuple) Sub(t1 Tuple) Tuple {
+	return Tuple{t.x - t1.x, t.y - t1.y, t.z - t1.z, t.w - t1.w}
+}
+
+// Multiply multiplies the coordinates of a tuple by a scalar value.
+func (t Tuple) Multiply(s float64) Tuple {
+	return Tuple{t.x * s, t.y * s, t.z * s, t.w * s}
+}
+
+// Divide divides the coordinates of a tuple by a scalar value.
+func (t Tuple) Divide(s float64) Tuple {
+	return Tuple{t.x / s, t.y / s, t.z / s, t.w / s}
+}
+
+// Negate negates a tuple.
+func (t Tuple) Negate() Tuple {
+	return t.Multiply(-1)
+}
+
+// Magnitude returns the magnitude of a tuple.
+func (t Tuple) Magnitude() float64 {
+	return math.Sqrt((t.x * t.x) + (t.y * t.y) + (t.z * t.z) + (t.w * t.w))
+}
+
+// Normalize normalizes a vector.
+func (t Tuple) Normalize() Tuple {
+	return t.Divide(t.Magnitude())
+}
+
+// Dot comptes the dot product of two tuples.
+func (t Tuple) Dot(t1 Tuple) float64 {
+	return (t.x * t1.x) + (t.y * t1.y) + (t.z * t1.z) + (t.w * t1.w)
+}
+
+// Cross comptes the cross product of two tuples.
+func (t Tuple) Cross(t1 Tuple) Tuple {
+	return Vector(t.y*t1.z-t.z*t1.y, t.z*t1.x-t.x*t1.z, t.x*t1.y-t.y*t1.x)
 }
 
 func eq(f1, f2, e float64) bool {
