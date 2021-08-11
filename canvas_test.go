@@ -1,7 +1,6 @@
 package tracer
 
 import (
-	"fmt"
 	"os"
 	"testing"
 )
@@ -12,8 +11,10 @@ func TestCanvas(t *testing.T) {
 	c.WritePixel(0, 0, Color(1.5, 0, 0))
 	c.WritePixel(2, 1, Color(0, 0.5, 0))
 	c.WritePixel(4, 2, Color(-0.5, 0, 1))
-
-	fmt.Println(c.ToPPM())
+	s := c.ToPPM()
+	if s != canvasPPM1 {
+		t.Errorf("expected %s, returned %s", canvasPPM1, s)
+	}
 
 	c = NewCanvas(10, 2)
 
@@ -23,7 +24,11 @@ func TestCanvas(t *testing.T) {
 		}
 	}
 
-	fmt.Println(c.ToPPM())
+	s = c.ToPPM()
+	if s != canvasPPM2 {
+		t.Errorf("expected %s, returned %s", canvasPPM2, s)
+	}
+
 }
 
 func TestPicture(t *testing.T) {
@@ -76,3 +81,18 @@ func TestPicture(t *testing.T) {
 		return
 	}
 }
+
+const canvasPPM1 string = `P3
+5 3
+255
+255 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 128 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 255`
+
+const canvasPPM2 string = `P3
+10 2
+255
+255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204
+153 255 204 153 255 204 153 255 204 153 255 204 153
+255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204
+153 255 204 153 255 204 153 255 204 153 255 204 153`
