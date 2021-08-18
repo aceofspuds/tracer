@@ -5,14 +5,14 @@ func Color(r, g, b float64) Tuple {
 	return Tuple([]float64{r, g, b})
 }
 
-// r returns the first element in a tuple.
-func (t Tuple) r() float64 { return t[0] }
+// // r returns the first element in a tuple.
+// func (t Tuple) r() float64 { return t[0] }
 
-// g returns the second element in a tuple.
-func (t Tuple) g() float64 { return t[1] }
+// // g returns the second element in a tuple.
+// func (t Tuple) g() float64 { return t[1] }
 
-// b returns the third element in a tuple.
-func (t Tuple) b() float64 { return t[2] }
+// // b returns the third element in a tuple.
+// func (t Tuple) b() float64 { return t[2] }
 
 // Product computes the hadamard product of two colors.
 func (t Tuple) Product(t1 Tuple) Tuple {
