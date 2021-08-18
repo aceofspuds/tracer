@@ -1,6 +1,9 @@
 package tracer
 
-import "errors"
+import (
+	"errors"
+	"math"
+)
 
 // Matrix represents a rectangular grid of numbers.
 type Matrix [][]float64
@@ -14,34 +17,14 @@ func NewMatrix(width, height int) Matrix {
 	return out
 }
 
-// Identity returns the identity matrix of a specified size.
+// IdentityMatrix returns the identity matrix of a specified size.
 func IdentityMatrix(size int) Matrix {
 	out := NewMatrix(size, size)
 	for i := 0; i < size; i++ {
-		out.Update(i, i, 1)
+		out[i][i] = 1
 	}
 
 	return out
-}
-
-// width is the width of a canvas.
-func (m Matrix) width() int {
-	return len(m[0])
-}
-
-// height is the height of a canvas.
-func (m Matrix) height() int {
-	return len(m)
-}
-
-// get gets a value in the matrix.
-func (m Matrix) Get(row, col int) float64 {
-	return m[row][col]
-}
-
-// update update writes a new value to a x-y coordinate in the matrix.
-func (m Matrix) Update(row, col int, v float64) {
-	m[row][col] = v
 }
 
 // Equal returns true if a matrix is equal to the specified matrix.
@@ -173,4 +156,93 @@ func (m Matrix) Inverse(e float64) (Matrix, error) {
 	}
 
 	return out.Transpose(), nil
+}
+
+// width is the width of a canvas.
+func (m Matrix) width() int {
+	return len(m[0])
+}
+
+// height is the height of a canvas.
+func (m Matrix) height() int {
+	return len(m)
+}
+
+// Note: the following functions apply to 4x4 matrices only.
+
+// ScalingMatrix returns a 4x4 scaling matrix with the specified values.
+func ScalingMatrix(x, y, z float64) Matrix {
+	out := NewMatrix(4, 4)
+	out[0][0] = x
+	out[1][1] = y
+	out[2][2] = z
+	out[3][3] = 1
+
+	return out
+}
+
+// TranslationMatrix returns a 4x4 translation matrix with the specified elements.
+func TranslationMatrix(x, y, z float64) Matrix {
+	out := IdentityMatrix(4)
+	out[0][3] = x
+	out[1][3] = y
+	out[2][3] = z
+
+	return out
+}
+
+// RotationX returns a 4x4 rotating matrix around the x-axis.
+func RotationXMatrix(rad float64) Matrix {
+	out := IdentityMatrix(4)
+
+	out[1][1] = math.Cos(rad)
+	out[1][2] = -1. * math.Sin(rad)
+	out[2][1] = math.Sin(rad)
+	out[2][2] = math.Cos(rad)
+
+	return out
+}
+
+// RotationY returns a 4x4 rotating matrix around the y-axis.
+func RotationYMatrix(rad float64) Matrix {
+	out := IdentityMatrix(4)
+
+	out[0][0] = math.Cos(rad)
+	out[0][2] = math.Sin(rad)
+	out[2][0] = -1. * math.Sin(rad)
+	out[2][2] = math.Cos(rad)
+
+	return out
+}
+
+// RotationZ returns a 4x4 rotating matrix around the z-axis.
+func RotationZMatrix(rad float64) Matrix {
+	out := IdentityMatrix(4)
+
+	out[0][0] = math.Cos(rad)
+	out[0][1] = -1. * math.Sin(rad)
+	out[1][0] = math.Sin(rad)
+	out[1][1] = math.Cos(rad)
+
+	return out
+}
+
+// ShearingOptions represents the changing in proportion parameters
+// of a shearing matrix (reads X in proportion to Y).
+type ShearingOptions struct {
+	XpY, XpZ, YpX, YpZ, ZpX, ZpY float64
+}
+
+// ShearingMatrix returns a 4x4 shearing matrix with the specified options.
+func ShearingMatrix(opt ShearingOptions) Matrix {
+	out := IdentityMatrix(4)
+
+	out[0][1] = opt.XpY
+	out[0][2] = opt.XpZ
+	out[1][0] = opt.YpX
+	out[1][2] = opt.YpZ
+	out[2][0] = opt.ZpX
+	out[2][1] = opt.ZpY
+
+	return out
 }

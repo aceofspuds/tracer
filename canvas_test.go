@@ -1,6 +1,7 @@
 package tracer
 
 import (
+	"math"
 	"os"
 	"testing"
 )
@@ -70,6 +71,40 @@ func TestPicture(t *testing.T) {
 
 	// write to file
 	f, err := os.Create("test.ppm")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer f.Close()
+	_, err = f.WriteString(c.ToPPM())
+	if err != nil {
+		t.Error(err)
+		return
+	}
+}
+
+func TestClock(t *testing.T) {
+	width := 900
+	height := 900
+	size := 3
+	c := NewCanvas(width, height)
+
+	p := Point(0, 1, 0)
+	scale := ScalingMatrix(0, float64(height)/3., 0)
+	translate := TranslationMatrix(float64(height)/2., float64(width)/2., 0)
+
+	for i := 0; i < 12; i++ {
+		transform := translate.Multiply(RotationZMatrix((float64(i) * 2. * math.Pi) / 12.).Multiply(scale))
+		p1 := transform.MultiplyT(p)
+		for i := 0; i < size; i++ {
+			for j := 0; j < size; j++ {
+				c.WritePixel(int(p1.x())+i, height-(int(p1.y())+j), Color(1, 0.5, 0.25))
+			}
+		}
+	}
+
+	// write to file
+	f, err := os.Create("clock.ppm")
 	if err != nil {
 		t.Error(err)
 		return

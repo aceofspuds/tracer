@@ -1,6 +1,7 @@
 package tracer
 
 import (
+	"math"
 	"testing"
 )
 
@@ -29,7 +30,7 @@ func Test4x4Matrix(t *testing.T) {
 	}
 
 	for i, td := range tds {
-		output := m.Get(td.row, td.col)
+		output := m[td.row][td.col]
 		if output != td.expected {
 			t.Errorf("test %d failed: expected %f, returned %f", i, td.expected, output)
 		}
@@ -56,7 +57,7 @@ func Test2x2Matrix(t *testing.T) {
 	}
 
 	for i, td := range tds {
-		output := m.Get(td.row, td.col)
+		output := m[td.row][td.col]
 		if output != td.expected {
 			t.Errorf("test %d failed: expected %f, returned %f", i, td.expected, output)
 		}
@@ -83,7 +84,7 @@ func TestMatrixEqual(t *testing.T) {
 		return
 	}
 
-	m2.Update(3, 3, 0)
+	m2[3][3] = 0
 
 	if m1.Equal(m2, epsilon) {
 		t.Error("expected not equal, returned true")
@@ -334,5 +335,176 @@ func TestInverse(t *testing.T) {
 	if !output.Equal(expected, epsilon) {
 		t.Errorf("expected %v, returned %v", expected, output)
 		return
+	}
+}
+
+func TestTranslation(t *testing.T) {
+	type test struct {
+		input    Tuple
+		expected Tuple
+	}
+
+	m := TranslationMatrix(5, -3, 2)
+	im, err := m.Inverse(epsilon)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	tts := []test{
+		{m.MultiplyT(Point(-3, 4, 5)), Point(2, 1, 7)},
+		{im.MultiplyT(Point(-3, 4, 5)), Point(-8, 7, 3)},
+		{m.MultiplyT(Vector(-3, 4, 5)), Vector(-3, 4, 5)},
+	}
+
+	for i, tt := range tts {
+		if !tt.input.Equal(tt.expected, epsilon) {
+			t.Errorf("test %d failed: expected %v, returned %v", i, tt.expected, tt.input)
+		}
+	}
+}
+
+func TestScaling(t *testing.T) {
+	type test struct {
+		input    Tuple
+		expected Tuple
+	}
+
+	m := ScalingMatrix(2, 3, 4)
+	im, err := m.Inverse(epsilon)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	tts := []test{
+		{m.MultiplyT(Point(-4, 6, 8)), Point(-8, 18, 32)},
+		{m.MultiplyT(Vector(-4, 6, 8)), Vector(-8, 18, 32)},
+		{im.MultiplyT(Vector(-4, 6, 8)), Vector(-2, 2, 2)},
+	}
+
+	for i, tt := range tts {
+		if !tt.input.Equal(tt.expected, epsilon) {
+			t.Errorf("test %d failed: expected %v, returned %v", i, tt.expected, tt.input)
+		}
+	}
+}
+
+func TestRotationX(t *testing.T) {
+	type test struct {
+		input    Tuple
+		expected Tuple
+	}
+
+	fullQuarter := RotationXMatrix(math.Pi / 2.)
+	halfQuarter := RotationXMatrix(math.Pi / 4.)
+	ihalfQuarter, err := halfQuarter.Inverse(epsilon)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	tts := []test{
+		{halfQuarter.MultiplyT(Point(0, 1, 0)), Point(0, math.Sqrt(2)/2., math.Sqrt(2)/2.)},
+		{fullQuarter.MultiplyT(Point(0, 1, 0)), Point(0, 0, 1)},
+		{ihalfQuarter.MultiplyT(Point(0, 1, 0)), Point(0, math.Sqrt(2)/2., -math.Sqrt(2)/2.)},
+	}
+
+	for i, tt := range tts {
+		if !tt.input.Equal(tt.expected, epsilon) {
+			t.Errorf("test %d failed: expected %v, returned %v", i, tt.expected, tt.input)
+		}
+	}
+}
+func TestRotationY(t *testing.T) {
+	type test struct {
+		input    Tuple
+		expected Tuple
+	}
+
+	fullQuarter := RotationYMatrix(math.Pi / 2.)
+	halfQuarter := RotationYMatrix(math.Pi / 4.)
+	ihalfQuarter, err := halfQuarter.Inverse(epsilon)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	tts := []test{
+		{halfQuarter.MultiplyT(Point(0, 0, 1)), Point(math.Sqrt(2)/2., 0, math.Sqrt(2)/2.)},
+		{fullQuarter.MultiplyT(Point(0, 0, 1)), Point(1, 0, 0)},
+		{ihalfQuarter.MultiplyT(Point(0, 0, 1)), Point(-math.Sqrt(2)/2., 0, math.Sqrt(2)/2.)},
+	}
+
+	for i, tt := range tts {
+		if !tt.input.Equal(tt.expected, epsilon) {
+			t.Errorf("test %d failed: expected %v, returned %v", i, tt.expected, tt.input)
+		}
+	}
+}
+
+func TestRotationZ(t *testing.T) {
+	type test struct {
+		input    Tuple
+		expected Tuple
+	}
+
+	fullQuarter := RotationZMatrix(math.Pi / 2.)
+	halfQuarter := RotationZMatrix(math.Pi / 4.)
+	ihalfQuarter, err := halfQuarter.Inverse(epsilon)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	tts := []test{
+		{halfQuarter.MultiplyT(Point(0, 1, 0)), Point(-math.Sqrt(2)/2., math.Sqrt(2)/2., 0)},
+		{fullQuarter.MultiplyT(Point(0, 1, 0)), Point(-1, 0, 0)},
+		{ihalfQuarter.MultiplyT(Point(0, 1, 0)), Point(math.Sqrt(2)/2., math.Sqrt(2)/2., 0)},
+	}
+
+	for i, tt := range tts {
+		if !tt.input.Equal(tt.expected, epsilon) {
+			t.Errorf("test %d failed: expected %v, returned %v", i, tt.expected, tt.input)
+		}
+	}
+}
+
+func TestShearing(t *testing.T) {
+	type test struct {
+		input    Tuple
+		expected Tuple
+	}
+
+	tts := []test{
+		{ShearingMatrix(ShearingOptions{XpY: 1}).MultiplyT(Point(2, 3, 4)), Point(5, 3, 4)},
+		{ShearingMatrix(ShearingOptions{XpZ: 1}).MultiplyT(Point(2, 3, 4)), Point(6, 3, 4)},
+		{ShearingMatrix(ShearingOptions{YpX: 1}).MultiplyT(Point(2, 3, 4)), Point(2, 5, 4)},
+		{ShearingMatrix(ShearingOptions{YpZ: 1}).MultiplyT(Point(2, 3, 4)), Point(2, 7, 4)},
+		{ShearingMatrix(ShearingOptions{ZpX: 1}).MultiplyT(Point(2, 3, 4)), Point(2, 3, 6)},
+		{ShearingMatrix(ShearingOptions{ZpY: 1}).MultiplyT(Point(2, 3, 4)), Point(2, 3, 7)},
+	}
+
+	for i, tt := range tts {
+		if !tt.input.Equal(tt.expected, epsilon) {
+			t.Errorf("test %d failed: expected %v, returned %v", i, tt.expected, tt.input)
+		}
+	}
+}
+
+func TestChained(t *testing.T) {
+	A := RotationXMatrix(math.Pi / 2.)
+	B := ScalingMatrix(5, 5, 5)
+	C := TranslationMatrix(10, 5, 7)
+
+	p1 := Point(1, 0, 1)
+	p1 = A.MultiplyT(p1)
+	p1 = B.MultiplyT(p1)
+	p1 = C.MultiplyT(p1)
+
+	p2 := Point(1, 0, 1)
+	p2 = C.Multiply(B).Multiply(A).MultiplyT(p2)
+	if !p1.Equal(p2, epsilon) {
+		t.Errorf("expected %v, returned %v", p1, p2)
 	}
 }
